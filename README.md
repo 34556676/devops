@@ -1,5 +1,135 @@
 # test
 // TODO(user): Add simple overview of use/purpose
+# pipeline.yaml
+
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │                 • MobaXterm Personal Edition v25.2 •                 │
+    │               (SSH client, X server and network tools)               │
+    │                                                                      │
+    │ ⮞ SSH session to root@172.16.36.230                                  │
+    │   • Direct SSH      :  ✓                                             │
+    │   • SSH compression :  ✓                                             │
+    │   • SSH-browser     :  ✓                                             │
+    │   • X11-forwarding  :  ✓  (remote display is forwarded through SSH)  │
+    │                                                                      │
+    │ ⮞ For more info, ctrl+click on help or visit our website.            │
+    └──────────────────────────────────────────────────────────────────────┘
+
+Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-131-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+New release '24.04.3 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+Last login: Mon Sep  1 08:51:15 2025 from 172.16.68.204
+
+[root@dev.devops.jenkins.node03 ~]
+# cd /data/devops/
+
+[root@dev.devops.jenkins.node03 /data/devops]
+# ls
+Dockerfile  Makefile  PROJECT  README.md  api  bin  cmd  config  go.mod  go.sum  hack  internal  main.exe  test
+
+[root@dev.devops.jenkins.node03 /data/devops]
+# cd config/samples/
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# ls
+devops_v1_pipeline.yaml  devops_v1_pipelinerun.yaml  kustomization.yaml
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# cat devops_v1_pipeline.yaml
+apiVersion: devops.lsym.org/v1
+kind: Pipeline
+metadata:
+  labels:
+    app.kubernetes.io/name: test
+    app.kubernetes.io/managed-by: kustomize
+  name: pipeline-sample
+  namespace: devops
+spec:
+  stages:
+    - name: build
+      parallel: false
+      tasks:
+        - name: view-version
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/golang:1.24.3
+          script: |
+            #!/usr/bin/env bash
+            echo "hello world,this is script shell"
+          env:
+            - name: GOOS
+              value: linux
+
+    - name: images
+      parallel: true
+      tasks:
+        - name: build
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openebs/alpine-bash:4.2.0
+          script: |
+            #!/usr/bin/env bash
+            echo "hello"
+
+        - name: shell-exec
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openebs/alpine-bash:4.2.0
+          script: |
+            #!/usr/bin/env bash
+            sleep 60
+            ls -lh
+
+    - name: deploy
+      parallel: false
+      tasks:
+        - name: deploy-to-staging
+          image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/kubesphere/kubectl:v1.27.4
+          script: |
+            #!/usr/bin/env bash
+            ls
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# ls
+devops_v1_pipeline.yaml  devops_v1_pipelinerun.yaml  kustomization.yaml
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# kubectl delete -f devops_v1_pipelinerun.yaml
+pipelinerun.devops.lsym.org "pipeline-sample2" deleted
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# kubectl apply -f -f devops_v1_pipelinerun.yaml
+error: Unexpected args: [devops_v1_pipelinerun.yaml]
+See 'kubectl apply -h' for help and examples
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+# kubectl apply -f  devops_v1_pipelinerun.yaml
+pipelinerun.devops.lsym.org/pipeline-sample2 created
+
+[root@dev.devops.jenkins.node03 /data/devops/config/samples]
+#
+
+
+# pipelineRun.yaml
+
+kind: PipelineRun
+metadata:
+  labels:
+    app.kubernetes.io/name: test
+    app.kubernetes.io/managed-by: kustomize
+  name: pipeline-sample2
+  namespace: devops
+spec:
+  pipelineRef: "pipeline-sample"
+  params:
+    commit: "ab3c123"
+    branch: "main"
+
+
 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use
