@@ -1,0 +1,35 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - devops.lsym.org
+  resources:
+  - pipelineruns
+  - pipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - devops.lsym.org
+  resources:
+  - pipelineruns/finalizers
+  - pipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - devops.lsym.org
+  resources:
+  - pipelineruns/status
+  - pipelines/status
+  verbs:
+  - get
+  - patch
+  - update

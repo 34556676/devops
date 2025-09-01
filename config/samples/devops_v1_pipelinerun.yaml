@@ -1,0 +1,13 @@
+apiVersion: devops.lsym.org/v1
+kind: PipelineRun
+metadata:
+  labels:
+    app.kubernetes.io/name: test
+    app.kubernetes.io/managed-by: kustomize
+  name: pipeline-sample2
+  namespace: devops
+spec:
+  pipelineRef: "pipeline-sample"
+  params:
+    commit: "ab3c123"
+    branch: "main"
