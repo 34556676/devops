@@ -66,6 +66,10 @@ spec:
   params:
     commit: "ab3c123"
     branch: "main"
+  workspaces:
+    - name: "data"
+      configMap:
+        name: "data-test"
 ```
 
 
